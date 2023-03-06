@@ -18,6 +18,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 #rom torch_snippets import Report
 #from torch_snippets import *
 
+IMAGE_LIMIT = 66
+
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -28,12 +30,17 @@ def test(model, test_loader, criterion):
     running_loss=0
     running_corrects=0
     
+    counter = 0
     for inputs, labels in test_loader:
         outputs=model(inputs)
         loss=criterion(outputs, labels)
         _, preds = torch.max(outputs, 1)
         running_loss += loss.item() * inputs.size(0)
         running_corrects += torch.sum(preds == labels.data)
+        
+        counter += 1
+        if counter >= IMAGE_LIMIT:
+            break
 
     total_loss = running_loss / len(test_loader)
     total_acc = running_corrects.double() / len(test_loader)
@@ -70,6 +77,9 @@ def train(model, train_loader, validation_loader, criterion, optimizer):
                 _, preds = torch.max(outputs, 1)
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
+                
+                if pos >= IMAGE_LIMIT:
+                    break
 
             epoch_loss = running_loss / len(image_dataset[phase])
             epoch_acc = running_corrects / len(image_dataset[phase])
@@ -84,6 +94,9 @@ def train(model, train_loader, validation_loader, criterion, optimizer):
                         tot=len(image_dataset[phase])
                         outputs = model(inputs)
                         valid_loss = criterion(outputs, labels)
+                        
+                        if pos >= IMAGE_LIMIT:
+                            break
                         #log.record(pos=(pos+1)/tot, valid_loss=valid_loss, end='\r') # impersistent data
 
         if loss_counter==1:
@@ -143,4 +156,3 @@ logger.info("Starting Model Training")
 model=train(model, train_loader, validation_loader, criterion, optimizer)
 torch.save(model.state_dict(), 'TrainedModels/model.pth')
 print('saved')
-
