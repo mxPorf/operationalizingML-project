@@ -10,7 +10,7 @@ logger.setLevel(logging.DEBUG)
 print('Loading Lambda function')
 
 runtime=boto3.Session().client('sagemaker-runtime')
-endpoint_Name='BradTestEndpoint'
+endpoint_Name='dog-breed-prediction'
 
 def lambda_handler(event, context):
 
@@ -35,7 +35,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'headers' : { 'Content-Type' : 'text/plain', 'Access-Control-Allow-Origin' : '*' },
         'type-result':str(type(result)),
-        'COntent-Type-In':str(context),
+        'Content-Type-In':str(context),
         'body' : json.dumps(sss)
         #'updated_result':str(updated_result)
 
